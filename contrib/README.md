@@ -141,13 +141,13 @@ mvn test -pl core -Dtest=SparkContextSuite
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| `JAVA_HOME` not set | `export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64` |
-| Maven out of memory | `export MAVEN_OPTS="-Xmx4g"` |
-| Missing `protoc` | `sudo apt install protobuf-compiler` |
-| Docker permission denied | Run with `sudo` or add user to docker group |
-| Build fails with test errors | Use `./build/mvn -DskipTests clean install` |
+| Problem                      | Solution                                              |
+| ---------------------------- | ----------------------------------------------------- |
+| `JAVA_HOME` not set          | `export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64` |
+| Maven out of memory          | `export MAVEN_OPTS="-Xmx4g"`                          |
+| Missing `protoc`             | `sudo apt install protobuf-compiler`                  |
+| Docker permission denied     | Run with `sudo` or add user to docker group           |
+| Build fails with test errors | Use `./build/mvn -DskipTests clean install`           |
 
 ## Files in This Directory
 

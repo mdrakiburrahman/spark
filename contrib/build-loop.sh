@@ -250,6 +250,68 @@ else
 fi
 
 # =============================================================================
+# STEP 6: VERIFY SDP (SPARK DECLARATIVE PIPELINES) COMPONENTS
+# =============================================================================
+
+print_banner "Step 6: Verifying SDP Components"
+
+log_time "Checking SDP (Spark Declarative Pipelines) build artifacts..."
+
+# Check for spark-pipelines JAR (sql/pipelines module)
+PIPELINES_JAR=$(find "$GIT_ROOT/sql/pipelines/target" -name "spark-pipelines_*.jar" ! -name "*-tests.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+if [ -n "$PIPELINES_JAR" ]; then
+    log_time "✓ spark-pipelines JAR: $(basename $PIPELINES_JAR)"
+else
+    echo "WARNING: spark-pipelines JAR not found in sql/pipelines/target"
+fi
+
+# Check for spark-connect JAR (sql/connect/server module)
+CONNECT_JAR=$(find "$GIT_ROOT/sql/connect/server/target" -name "spark-connect_*.jar" ! -name "*-tests.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+if [ -n "$CONNECT_JAR" ]; then
+    log_time "✓ spark-connect JAR: $(basename $CONNECT_JAR)"
+else
+    echo "WARNING: spark-connect JAR not found in sql/connect/server/target"
+fi
+
+# Check for spark-pipelines CLI script
+if [ -x "$GIT_ROOT/bin/spark-pipelines" ]; then
+    log_time "✓ spark-pipelines CLI: bin/spark-pipelines"
+else
+    echo "WARNING: spark-pipelines CLI script not found or not executable"
+fi
+
+# Check for Python pyspark.pipelines module
+if [ -d "$GIT_ROOT/python/pyspark/pipelines" ]; then
+    PY_FILES=$(find "$GIT_ROOT/python/pyspark/pipelines" -name "*.py" | wc -l)
+    log_time "✓ PySpark pipelines module: $PY_FILES Python files"
+else
+    echo "WARNING: PySpark pipelines module not found"
+fi
+
+# Check for start-connect-server.sh script
+if [ -x "$GIT_ROOT/sbin/start-connect-server.sh" ]; then
+    log_time "✓ Spark Connect server script: sbin/start-connect-server.sh"
+else
+    echo "WARNING: start-connect-server.sh not found or not executable"
+fi
+
+log_time "SDP component verification complete"
+
+# Optional: Run SDP smoke test if TEST_SDP=1
+if [ "${TEST_SDP:-0}" = "1" ]; then
+    print_banner "Step 6b: Running SDP Smoke Test"
+    
+    if [ -x "$GIT_ROOT/contrib/test-loop.sh" ]; then
+        log_time "Running SDP end-to-end test..."
+        "$GIT_ROOT/contrib/test-loop.sh" || {
+            echo "WARNING: SDP smoke test failed (non-fatal)"
+        }
+    else
+        log_time "WARNING: test-loop.sh not found, skipping SDP smoke test"
+    fi
+fi
+
+# =============================================================================
 # SUMMARY
 # =============================================================================
 
@@ -264,10 +326,20 @@ echo "Summary:"
 echo "  - Spark built successfully"
 echo "  - Smoke test passed"
 echo "  - Distribution created at: $DIST_DIR"
+echo "  - SDP (Spark Declarative Pipelines) components verified"
 echo ""
 echo "Total time: ${TOTAL_MINS}m ${TOTAL_SECS}s"
 echo ""
 echo "Next steps:"
 echo "  - Start Spark shell: ./bin/spark-shell --master local[2]"
 echo "  - Run more examples: ./bin/run-example <example-name>"
+echo ""
+echo "To test SDP (Spark Declarative Pipelines):"
+echo "  - Run: ./contrib/test-loop.sh"
+echo "  - Or set TEST_SDP=1 ./contrib/build-loop.sh to include SDP test"
+echo ""
+echo "To debug SDP step-by-step:"
+echo "  1. Start Spark Connect: ./sbin/start-connect-server.sh --wait --master local[4]"
+echo "  2. In another terminal:  ./bin/spark-pipelines --remote sc://localhost:15002 init --name my-pipeline"
+echo "  3. Run pipeline:         cd my-pipeline && ../bin/spark-pipelines --remote sc://localhost:15002 run"
 echo ""

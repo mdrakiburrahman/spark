@@ -12,7 +12,8 @@
 #
 # Prerequisites:
 #   - Run build-loop.sh first (or at least build Spark with: ./build/mvn -DskipTests clean install -Phive -Phive-thriftserver)
-#   - Python 3.8+ with PyYAML installed
+#   - Python 3.8+ with the following packages installed:
+#     pip3 install --user pandas pyarrow grpcio grpcio-status pyyaml zstandard --break-system-packages
 #
 # ---------------------------------------------------------------------------------------
 
@@ -208,7 +209,6 @@ export SPARK_HOME="$GIT_ROOT"
     --conf "spark.driver.memory=2g" \
     --conf "spark.executor.memory=2g" \
     --conf "spark.sql.warehouse.dir=$GIT_ROOT/contrib/spark-warehouse" \
-    --packages org.apache.spark:spark-connect_2.13:4.0.0-preview2 \
     &
 
 # Get the PID
